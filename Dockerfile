@@ -1,7 +1,8 @@
 FROM ubuntu:16.04
-
+LABEL maintainer Andrey Larin <lestex@gmail.com>
 ENV container docker
 
+# Don't start any optional services except for the few we need.
 RUN find /etc/systemd/system \
          /lib/systemd/system \
          -path '*.wants/*' \
@@ -11,10 +12,6 @@ RUN find /etc/systemd/system \
          -exec rm \{} \;
 
 RUN systemctl set-default multi-user.target
+VOLUME ["/sys/fs/cgroup"]
 
-COPY setup /sbin/
-
-STOPSIGNAL SIGRTMIN+3
-
-# Workaround for docker/docker#27202, technique based on comments from docker/docker#9212
-CMD ["/bin/bash", "-c", "exec /sbin/init --log-target=journal 3>&1"]
+CMD ["/sbin/init"]
